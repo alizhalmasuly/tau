@@ -77,7 +77,14 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+DATABASE_URL = next(
+    (
+        os.getenv(name, "").strip()
+        for name in ("DATABASE_URL", "POSTGRES_URL", "POSTGRES_URL_NON_POOLING")
+        if os.getenv(name, "").strip()
+    ),
+    "",
+)
 if DATABASE_URL:
     DATABASES = {"default": dj_database_url.parse(
         DATABASE_URL,
@@ -88,7 +95,9 @@ if DATABASE_URL:
 elif DEBUG:
     DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
 else:
-    raise ImproperlyConfigured("DATABASE_URL must point to persistent PostgreSQL outside local DEBUG mode")
+    raise ImproperlyConfigured(
+        "Set DATABASE_URL or POSTGRES_URL to a persistent PostgreSQL database when DEBUG is False"
+    )
 
 REDIS_URL = os.getenv("REDIS_URL", "").strip()
 if REDIS_URL:
