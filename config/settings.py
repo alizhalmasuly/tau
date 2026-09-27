@@ -10,7 +10,7 @@ load_dotenv(BASE_DIR / ".env.local")
 load_dotenv(BASE_DIR / ".env")
 
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
-SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
+SECRET_KEY = (os.getenv("SECRET_KEY") or os.getenv("DJANGO_SECRET_KEY", "")).strip()
 if not SECRET_KEY:
     if DEBUG:
         SECRET_KEY = "dev-only-change-this-secret-key"
