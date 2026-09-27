@@ -1,4 +1,4 @@
-# tau. | Mountain Hiking Platform
+# UP! | Mountain Hiking Platform
 
 A multilingual Django hiking platform with worldwide peak search, OpenStreetMap trail maps, coordinate-based weather, equipment planning, a floating hiking assistant and a community story feed.
 

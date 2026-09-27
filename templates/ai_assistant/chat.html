@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load ui_tags l10n %}
-{% block title %}{{ T.nav_assistant }} — tau.{% endblock %}
+{% block title %}{{ T.nav_assistant }} — UP!{% endblock %}
 {% block content %}
 <section class="assistant-page"><div class="page-width assistant-layout" data-assistant-root>
   <div class="assistant-intro">
     <p class="eyebrow"><span class="eyebrow-dot"></span>TAU FIELD GUIDE · AI</p><h1>{{ T.assistant_title }}</h1><p>{{ T.assistant_sub }}</p>
     <div class="assistant-context">
-      <label>{{ T.choose_mountain }}<select data-assistant-mountain><option value="">—</option>{% for mountain in mountains %}<option value="{{ mountain.name }}" data-latitude="{{ mountain.latitude|unlocalize }}" data-longitude="{{ mountain.longitude|unlocalize }}">{{ mountain.name }}</option>{% endfor %}</select></label>
+      <div class="assistant-place-control"><label for="assistant-place">{{ T.weather_place }}</label><form class="assistant-place-search" data-assistant-place-form data-endpoint="{% url 'weather:search' %}"><input id="assistant-place" type="search" maxlength="120" placeholder="{{ T.weather_place }}" autocomplete="off" data-assistant-mountain><button type="submit" aria-label="{{ T.search_button }}"><i data-lucide="search"></i></button></form><small data-assistant-place-status role="status" aria-live="polite"></small></div>
       <label>{{ T.season }}<select data-assistant-season><option value="spring">{{ T.spring }}</option><option value="summer" selected>{{ T.summer }}</option><option value="autumn">{{ T.autumn }}</option><option value="winter">{{ T.winter }}</option></select></label>
       <label>{{ T.duration_hours }}<select data-assistant-duration><option value="3">3 h</option><option value="5" selected>5 h</option><option value="8">8 h</option><option value="12">12 h</option></select></label>
       <label>{{ T.difficulty }}<select data-assistant-difficulty>{% for value,label in difficulty_choices %}<option value="{{ value }}">{{ T|get_difficulty:value }}</option>{% endfor %}</select></label>

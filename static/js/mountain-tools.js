@@ -114,7 +114,7 @@
     const bounds = [];
     const peakMarker = window.L.circleMarker([latitude, longitude], {
       radius: 9, color: '#17372f', weight: 3, fillColor: '#d9f078', fillOpacity: 1,
-    }).bindTooltip(`${canvas.dataset.peakLabel}: ${peak.name}`, { direction: 'top' });
+    }).bindTooltip(`${peak.is_peak ? canvas.dataset.peakLabel : canvas.dataset.placeLabel}: ${peak.name}`, { direction: 'top' });
     peakMarker.addTo(layer);
     bounds.push([latitude, longitude]);
     map.setView([latitude, longitude], 11);
@@ -207,12 +207,12 @@
           button.setAttribute('role', 'option');
           button.setAttribute('aria-selected', 'false');
           button.dataset.resultIndex = String(index);
-          button.append(iconNode('mountain'));
+          button.append(iconNode(peak.is_peak ? 'mountain' : 'map-pin'));
           const nameLocation = document.createElement('span');
           appendText(nameLocation, 'strong', '', peak.name);
           appendText(nameLocation, 'small', '', peak.location);
           button.append(nameLocation);
-          if (peak.elevation !== null && peak.elevation !== undefined) appendText(button, 'span', 'result-elevation', `${peak.elevation} m`);
+          if (peak.is_peak && peak.elevation !== null && peak.elevation !== undefined) appendText(button, 'span', 'result-elevation', `${peak.elevation} m`);
           button.append(iconNode('arrow-up-right'));
           results.append(button);
         });
@@ -248,6 +248,8 @@
       selection.hidden = false;
       explorer.querySelector('[data-selected-name]').textContent = peak.name;
       explorer.querySelector('[data-selected-location]').textContent = peak.location;
+      const elevation = explorer.querySelector('.selected-peak-elevation');
+      elevation.hidden = !peak.is_peak;
       explorer.querySelector('[data-selected-elevation]').textContent = peak.elevation === null || peak.elevation === undefined ? explorer.dataset.elevationMissing : `${peak.elevation} m`;
       explorer.querySelector('[data-selected-coordinates]').textContent = `${Number(peak.latitude).toFixed(5)}, ${Number(peak.longitude).toFixed(5)}`;
       input.value = peak.name;
@@ -270,12 +272,42 @@
         message.textContent = widget.dataset.coordinateError;
       }
     });
-    document.querySelectorAll('[data-weather-select]').forEach((select) => {
-      select.addEventListener('change', () => {
-        const option = select.selectedOptions[0];
-        const widget = document.querySelector('[data-weather-widget]');
-        if (option?.dataset.latitude && option?.dataset.longitude) {
-          loadWeather(widget, option.dataset.latitude, option.dataset.longitude, option.dataset.location);
+    document.querySelectorAll('[data-place-search]').forEach((form) => {
+      const input = form.querySelector('input[name="q"]');
+      const status = form.querySelector('[data-place-status]');
+      const button = form.querySelector('button[type="submit"]');
+      const messages = {
+        ru: { loading: '\u0418\u0449\u0435\u043c \u043c\u0435\u0441\u0442\u043e\u2026', empty: '\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e. \u0423\u0442\u043e\u0447\u043d\u0438\u0442\u0435 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u0433\u043e\u0440\u043e\u0434\u0430.', error: '\u041f\u043e\u0438\u0441\u043a \u043c\u0435\u0441\u0442\u0430 \u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d.', rate: '\u041f\u043e\u0434\u043e\u0436\u0434\u0438\u0442\u0435 \u043c\u0438\u043d\u0443\u0442\u0443 \u0438 \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0441\u043d\u043e\u0432\u0430.' },
+        kk: { loading: '\u041e\u0440\u044b\u043d \u0456\u0437\u0434\u0435\u043b\u0443\u0434\u0435\u2026', empty: '\u041e\u0440\u044b\u043d \u0442\u0430\u0431\u044b\u043b\u043c\u0430\u0434\u044b. \u049a\u0430\u043b\u0430 \u0430\u0442\u0430\u0443\u044b\u043d \u043d\u0430\u049b\u0442\u044b\u043b\u0430\u04a3\u044b\u0437.', error: '\u041e\u0440\u044b\u043d\u0434\u044b \u0456\u0437\u0434\u0435\u0443 \u0443\u0430\u049b\u044b\u0442\u0448\u0430 \u049b\u043e\u043b\u0436\u0435\u0442\u0456\u043c\u0441\u0456\u0437.', rate: '\u0411\u0456\u0440 \u043c\u0438\u043d\u0443\u0442 \u043a\u04af\u0442\u0456\u043f, \u049b\u0430\u0439\u0442\u0430\u0434\u0430\u043d \u043a\u04e9\u0440\u0456\u04a3\u0456\u0437.' },
+        en: { loading: 'Searching for the place…', empty: 'No place found. Try a more specific city name.', error: 'Place search is temporarily unavailable.', rate: 'Wait a moment and try again.' },
+      };
+      const language = (document.documentElement.lang || 'en').slice(0, 2);
+      const copy = messages[language] || messages.en;
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const query = input.value.trim();
+        if (query.length < 2) return;
+        button.disabled = true;
+        status.textContent = copy.loading;
+        try {
+          const url = new URL(form.dataset.endpoint, window.location.origin);
+          url.searchParams.set('q', query);
+          const response = await fetch(url, { headers: { Accept: 'application/json' } });
+          const data = await response.json();
+          const place = data.results?.[0];
+          if (!response.ok) {
+            status.textContent = data.error === 'rate_limited' ? copy.rate : copy.error;
+          } else if (!place) {
+            status.textContent = copy.empty;
+          } else {
+            status.textContent = '';
+            const widget = form.closest('.weather-main').querySelector('[data-weather-widget]');
+            loadWeather(widget, place.latitude, place.longitude, place.name);
+          }
+        } catch {
+          status.textContent = copy.error;
+        } finally {
+          button.disabled = false;
         }
       });
     });

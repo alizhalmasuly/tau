@@ -4,10 +4,47 @@ from datetime import datetime, timezone
 from hashlib import sha256
 from urllib.error import URLError
 from urllib.parse import urlencode
+from urllib.request import Request
 from urllib.request import urlopen
 
 from django.conf import settings
 from django.core.cache import cache
+
+
+def find_place(query, language="en"):
+    query = " ".join(query.split())[:120]
+    if len(query) < 2:
+        return []
+    cache_key = "weather-place:" + sha256(f"{language}:{query.casefold()}".encode()).hexdigest()
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    if not cache.add("mountain-search:provider-request", True, timeout=1):
+        return None
+    params = {
+        "q": query,
+        "format": "jsonv2",
+        "addressdetails": 1,
+        "limit": 1,
+        "accept-language": language,
+    }
+    if settings.MOUNTAIN_SEARCH_CONTACT:
+        params["email"] = settings.MOUNTAIN_SEARCH_CONTACT
+    url = f"{settings.MOUNTAIN_SEARCH_URL}?{urlencode(params)}"
+    request = Request(url, headers={"User-Agent": settings.MOUNTAIN_SEARCH_USER_AGENT})
+    with urlopen(request, timeout=8) as response:
+        payload = json.loads(response.read())
+    results = []
+    for item in payload if isinstance(payload, list) else []:
+        try:
+            latitude, longitude = float(item["lat"]), float(item["lon"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if -90 <= latitude <= 90 and -180 <= longitude <= 180:
+            results.append({"latitude": latitude, "longitude": longitude, "name": item.get("display_name", query)})
+            break
+    cache.set(cache_key, results, timeout=60 * 60)
+    return results
 
 
 def _local_time(timestamp, offset):

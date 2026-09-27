@@ -45,7 +45,7 @@ def search_mountains(query, language="en"):
     if len(query) < 3:
         return []
 
-    cache_key = "mountain-search:" + hashlib.sha256(f"{language}:{query.casefold()}".encode()).hexdigest()
+    cache_key = "map-place-search:" + hashlib.sha256(f"{language}:{query.casefold()}".encode()).hexdigest()
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
@@ -71,8 +71,6 @@ def search_mountains(query, language="en"):
         tags = item.get("extratags") or {}
         category = item.get("category") or item.get("class")
         item_type = item.get("type")
-        if category != "natural" or item_type not in {"peak", "mountain", "volcano"}:
-            continue
         try:
             latitude = float(item["lat"])
             longitude = float(item["lon"])
@@ -89,6 +87,7 @@ def search_mountains(query, language="en"):
             "latitude": latitude,
             "longitude": longitude,
             "elevation": _elevation(tags.get("ele")),
+            "is_peak": category == "natural" and item_type in {"peak", "mountain", "volcano"},
             "kind": item_type,
             "source": "OpenStreetMap",
         })

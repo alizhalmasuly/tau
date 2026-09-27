@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ mountain.name }} — tau.{% endblock %}
+{% block title %}{{ mountain.name }} — UP!{% endblock %}
 {% block extra_head %}<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>{% endblock %}
 {% block content %}
 <section class="route-cover" style="--cover-image: url('{{ mountain.image_url }}')"><div class="route-cover-shade"></div><div class="page-width route-cover-content"><a class="back-link" href="{% url 'mountains:list' %}"><i data-lucide="arrow-left"></i>{{ T.back_mountains }}</a><p class="eyebrow light-eyebrow">{{ mountain.location }}</p><h1>{{ mountain.name }}</h1><p>{{ mountain.short_description }}</p><div class="route-quick-facts"><span><i data-lucide="mountain"></i>{{ mountain.altitude }} m</span><span><i data-lucide="clock-3"></i>{{ mountain.duration_hours }} h</span><span><i data-lucide="activity"></i>{{ mountain.get_difficulty_display }}</span></div></div><span class="cover-side-label">ILE ALATAU · KAZAKHSTAN</span></section>

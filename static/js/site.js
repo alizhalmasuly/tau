@@ -22,6 +22,49 @@
     radios.forEach((radio) => radio.addEventListener('change', updateProgress)); updateProgress();
     document.querySelectorAll('[data-toast-stack] .toast').forEach((toast) => setTimeout(() => toast.remove(), 4200));
 
+    document.querySelectorAll('[data-assistant-place-form]').forEach((searchForm) => {
+      const placeInput = searchForm.querySelector('[data-assistant-mountain]');
+      const status = searchForm.parentElement.querySelector('[data-assistant-place-status]');
+      const button = searchForm.querySelector('button');
+      const copy = {
+        ru: { loading: '\u0418\u0449\u0435\u043c \u043c\u0435\u0441\u0442\u043e\u2026', found: '\u041c\u0435\u0441\u0442\u043e \u043d\u0430\u0439\u0434\u0435\u043d\u043e', empty: '\u041c\u0435\u0441\u0442\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e', error: '\u041f\u043e\u0438\u0441\u043a \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d', rate: '\u041f\u043e\u0434\u043e\u0436\u0434\u0438\u0442\u0435 \u043c\u0438\u043d\u0443\u0442\u0443' },
+        kk: { loading: '\u041e\u0440\u044b\u043d \u0456\u0437\u0434\u0435\u043b\u0443\u0434\u0435\u2026', found: '\u041e\u0440\u044b\u043d \u0442\u0430\u0431\u044b\u043b\u0434\u044b', empty: '\u041e\u0440\u044b\u043d \u0442\u0430\u0431\u044b\u043b\u043c\u0430\u0434\u044b', error: '\u0406\u0437\u0434\u0435\u0443 \u049b\u043e\u043b\u0436\u0435\u0442\u0456\u043c\u0441\u0456\u0437', rate: '\u0411\u0456\u0440 \u043c\u0438\u043d\u0443\u0442 \u043a\u04af\u0442\u0456\u04a3\u0456\u0437' },
+        en: { loading: 'Searching…', found: 'Place found', empty: 'Place not found', error: 'Search unavailable', rate: 'Wait a minute and try again' },
+      }[(document.documentElement.lang || 'en').slice(0, 2)] || { loading: 'Searching…', found: 'Place found', empty: 'Place not found', error: 'Search unavailable', rate: 'Wait a minute and try again' };
+      placeInput.addEventListener('input', () => {
+        delete placeInput.dataset.latitude;
+        delete placeInput.dataset.longitude;
+        delete placeInput.dataset.placeName;
+        status.textContent = '';
+      });
+      searchForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const query = placeInput.value.trim();
+        if (query.length < 2) return;
+        button.disabled = true;
+        status.textContent = copy.loading;
+        try {
+          const url = new URL(searchForm.dataset.endpoint, window.location.origin);
+          url.searchParams.set('q', query);
+          const response = await fetch(url, { headers: { Accept: 'application/json' } });
+          const data = await response.json();
+          const place = data.results?.[0];
+          if (!response.ok) status.textContent = data.error === 'rate_limited' ? copy.rate : copy.error;
+          else if (!place) status.textContent = copy.empty;
+          else {
+            placeInput.dataset.latitude = String(place.latitude);
+            placeInput.dataset.longitude = String(place.longitude);
+            placeInput.dataset.placeName = place.name;
+            status.textContent = copy.found;
+          }
+        } catch {
+          status.textContent = copy.error;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    });
+
     document.querySelectorAll('[data-chat-panel]').forEach((panel) => {
       const form = panel.querySelector('[data-chat-form]');
       const messages = panel.querySelector('[data-chat-messages]');
@@ -51,15 +94,14 @@
         typing.hidden = false;
         input.disabled = true;
         const mountainSelect = contextControl('mountain');
-        const route = mountainSelect?.selectedOptions[0];
         const context = {
           message: text,
-          mountain: mountainSelect?.value,
+          mountain: mountainSelect?.dataset.placeName || mountainSelect?.value,
           season: contextControl('season')?.value,
           duration: contextControl('duration')?.value,
           difficulty: contextControl('difficulty')?.value,
-          latitude: route?.dataset.latitude,
-          longitude: route?.dataset.longitude,
+          latitude: mountainSelect?.dataset.latitude,
+          longitude: mountainSelect?.dataset.longitude,
         };
         try {
           const response = await fetch(panel.dataset.endpoint, {
