@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load ui_tags %}
+{% block title %}{{ T.nav_prepare }} — tau.{% endblock %}
+{% block content %}
+<section class="simple-page-head"><div class="page-width"><p class="eyebrow">01 — BEFORE THE TRAIL</p><h1>{{ T.prepare_title }}</h1><p>{{ T.prepare_sub }}</p></div></section>
+<section class="section prep-section"><div class="page-width prep-layout">
+  <div class="prep-main"><form method="post" class="prep-form">{% csrf_token %}
+    <section class="prep-panel"><div class="panel-heading"><span class="panel-number">01</span><div><h2>{{ T.trip_plan }}</h2><p>{{ T.choose_mountain }}, {{ T.season|lower }}, {{ T.people|lower }}</p></div></div>
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="plan-fields">
+        <label class="field-label">{{ T.choose_mountain }}<select name="mountain" required>{% for mountain in form.fields.mountain.queryset %}<option value="{{ mountain.pk }}"{% if request.GET.mountain == mountain.slug %} selected{% endif %}>{{ mountain.name }} · {{ mountain.altitude }} m</option>{% endfor %}</select></label>
+        <label class="field-label">{{ T.difficulty }}<select name="difficulty">{% for value,label in form.fields.difficulty.choices %}<option value="{{ value }}">{{ T|get_difficulty:value }}</option>{% endfor %}</select></label>
+        <label class="field-label">{{ T.duration_hours }}<input type="number" name="duration_hours" min="1" max="48" value="5"></label>
+        <label class="field-label">{{ T.season }}<select name="season"><option value="spring">{{ T.spring }}</option><option value="summer" selected>{{ T.summer }}</option><option value="autumn">{{ T.autumn }}</option><option value="winter">{{ T.winter }}</option></select></label>
+        <label class="field-label">{{ T.people_count }}<input type="number" name="people_count" min="1" max="50" value="2"></label>
+      </div>
+    </section>
+    <section class="prep-panel gear-panel"><div class="panel-heading"><span class="panel-number">02</span><div><h2>{{ T.gear_title }}</h2><p>{{ T.gear_sub }}</p></div></div>
+      <div class="gear-groups">
+        {% for category,items in groups.items %}<div class="gear-group"><h3>{% if category == 'clothing' %}{{ T.equipment_category_clothing }}{% elif category == 'navigation' %}{{ T.equipment_category_navigation }}{% elif category == 'food' %}{{ T.equipment_category_food }}{% elif category == 'safety' %}{{ T.equipment_category_safety }}{% else %}{{ T.equipment_category_camping }}{% endif %}</h3>
+          {% for item in items %}<div class="gear-row"><span>{{ item.localized_name }}</span><div class="gear-options"><label class="gear-option"><input type="radio" name="gear_{{ item.id }}" value="have"{% if checks|get_item:item.id %} checked{% endif %}><span class="option-check"><i data-lucide="check"></i></span>{{ T.have_it }}</label><label class="gear-option"><input type="radio" name="gear_{{ item.id }}" value="need"{% if not checks|get_item:item.id %} checked{% endif %}><span class="option-circle"></span>{{ T.need_it }}</label></div></div>{% endfor %}
+        </div>{% endfor %}
+      </div><button type="submit" class="button button-dark submit-checklist">{{ T.save_checklist }}<i data-lucide="arrow-right"></i></button>
+    </section>
+  </form></div>
+  <aside class="prep-aside"><div class="prep-aside-photo"></div><div class="prep-aside-copy"><i data-lucide="sparkles"></i><p class="eyebrow">A LITTLE EXTRA CONFIDENCE</p><h2>{{ T.assistant_title }}</h2><p>{{ T.assistant_sub }}</p></div><div class="check-progress" data-check-progress><div><span>{{ T.gear_title }}</span><strong data-progress-label>0%</strong></div><div class="progress-track"><span data-progress-bar></span></div></div></aside>
+</div></section>
+{% endblock %}

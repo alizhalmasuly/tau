@@ -1,0 +1,17 @@
+{% load ui_tags %}
+<aside class="assistant-dock" data-assistant-dock>
+  <section class="assistant-dock-panel" id="global-assistant-panel" data-chat-panel data-assistant-root data-endpoint="{% url 'ai_assistant:chat' %}" data-error="{{ T.assistant_error }}" aria-labelledby="dock-assistant-title" hidden>
+    <header class="dock-chat-header"><span class="guide-avatar"><i data-lucide="sparkles"></i></span><div><strong id="dock-assistant-title">{{ T.assistant_dock_title }}</strong><span><i></i>{% if AI_CONFIGURED %} {{ T.assistant_live_mode }}{% else %} {{ T.assistant_demo_mode }}{% endif %}</span></div><button class="dock-close" type="button" data-assistant-close aria-label="{{ T.assistant_close }}"><i data-lucide="x"></i></button></header>
+    <div class="dock-chat-context">
+      <label>{{ T.choose_mountain }}<select data-assistant-mountain><option value="">—</option>{% for mountain in ASSISTANT_MOUNTAINS %}<option value="{{ mountain.name }}" data-latitude="{{ mountain.latitude }}" data-longitude="{{ mountain.longitude }}">{{ mountain.name }}</option>{% endfor %}</select></label>
+      <label>{{ T.season }}<select data-assistant-season><option value="spring">{{ T.spring }}</option><option value="summer" selected>{{ T.summer }}</option><option value="autumn">{{ T.autumn }}</option><option value="winter">{{ T.winter }}</option></select></label>
+      <label>{{ T.duration_hours }}<select data-assistant-duration><option value="3">3 h</option><option value="5" selected>5 h</option><option value="8">8 h</option><option value="12">12 h</option></select></label>
+      <label>{{ T.difficulty }}<select data-assistant-difficulty>{% for value,label in ASSISTANT_DIFFICULTY_CHOICES %}<option value="{{ value }}">{{ T|get_difficulty:value }}</option>{% endfor %}</select></label>
+    </div>
+    <div class="chat-messages dock-chat-messages" data-chat-messages><div class="chat-message assistant-message"><span class="message-avatar"><i data-lucide="mountain"></i></span><p>{{ T.assistant_intro }}</p></div></div>
+    <div class="typing-indicator" data-typing hidden><span></span><span></span><span></span></div>
+    <form class="chat-compose dock-chat-compose" data-chat-form><input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"><textarea name="message" rows="1" placeholder="{{ T.assistant_placeholder }}" aria-label="{{ T.assistant_placeholder }}" required data-chat-input></textarea><button class="chat-send" type="submit" aria-label="{{ T.assistant_send }}"><i data-lucide="arrow-up"></i></button></form>
+    <p class="chat-footnote">{{ T.assistant_hint }}</p>
+  </section>
+  <button class="assistant-launcher" type="button" data-assistant-toggle data-open-label="{{ T.assistant_open }}" data-close-label="{{ T.assistant_close }}" aria-expanded="false" aria-controls="global-assistant-panel" aria-label="{{ T.assistant_open }}"><i data-lucide="message-circle"></i><span>{{ T.nav_assistant }}</span></button>
+</aside>

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load ui_tags l10n %}
+{% block title %}{{ T.nav_assistant }} — tau.{% endblock %}
+{% block content %}
+<section class="assistant-page"><div class="page-width assistant-layout" data-assistant-root>
+  <div class="assistant-intro">
+    <p class="eyebrow"><span class="eyebrow-dot"></span>TAU FIELD GUIDE · AI</p><h1>{{ T.assistant_title }}</h1><p>{{ T.assistant_sub }}</p>
+    <div class="assistant-context">
+      <label>{{ T.choose_mountain }}<select data-assistant-mountain><option value="">—</option>{% for mountain in mountains %}<option value="{{ mountain.name }}" data-latitude="{{ mountain.latitude|unlocalize }}" data-longitude="{{ mountain.longitude|unlocalize }}">{{ mountain.name }}</option>{% endfor %}</select></label>
+      <label>{{ T.season }}<select data-assistant-season><option value="spring">{{ T.spring }}</option><option value="summer" selected>{{ T.summer }}</option><option value="autumn">{{ T.autumn }}</option><option value="winter">{{ T.winter }}</option></select></label>
+      <label>{{ T.duration_hours }}<select data-assistant-duration><option value="3">3 h</option><option value="5" selected>5 h</option><option value="8">8 h</option><option value="12">12 h</option></select></label>
+      <label>{{ T.difficulty }}<select data-assistant-difficulty>{% for value,label in difficulty_choices %}<option value="{{ value }}">{{ T|get_difficulty:value }}</option>{% endfor %}</select></label>
+      <a class="text-link" href="{% url 'weather:forecast' %}">{{ T.nav_weather }}<i data-lucide="arrow-up-right"></i></a>
+    </div>
+    <p class="assistant-safety"><i data-lucide="shield-alert"></i>{{ T.assistant_hint }}</p>
+  </div>
+  <section class="chat-panel" data-chat-panel data-endpoint="{% url 'ai_assistant:chat' %}" data-error="{{ T.assistant_error }}">
+    <div class="chat-header"><div class="guide-avatar"><i data-lucide="sparkles"></i></div><div><strong>TAU GUIDE</strong><span><i></i> {{ T.assistant_title }}</span></div><span class="chat-status">{% if AI_CONFIGURED %}{{ T.assistant_live_mode }}{% else %}{{ T.assistant_demo_mode }}{% endif %}</span></div>
+    <div class="chat-messages" data-chat-messages><div class="chat-message assistant-message"><span class="message-avatar"><i data-lucide="mountain"></i></span><p>{{ T.assistant_intro }}</p></div></div>
+    <div class="typing-indicator" data-typing hidden><span></span><span></span><span></span></div>
+    <form class="chat-compose" data-chat-form><input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"><textarea name="message" rows="1" placeholder="{{ T.assistant_placeholder }}" aria-label="{{ T.assistant_placeholder }}" required data-chat-input></textarea><button class="chat-send" type="submit" aria-label="{{ T.assistant_send }}"><i data-lucide="arrow-up"></i></button></form>
+    <p class="chat-footnote">{{ T.assistant_hint }}</p>
+  </section>
+</div></section>
+{% endblock %}

@@ -1,0 +1,19 @@
+<section class="mountain-explorer" data-mountain-explorer data-search-endpoint="{% url 'mountains:search_api' %}" data-trails-endpoint="{% url 'mountains:trails_api' %}" data-min-length="{{ T.world_search_min }}" data-search-loading="{{ T.world_search_loading }}" data-search-empty="{{ T.world_search_none }}" data-search-error="{{ T.world_search_error }}" data-search-rate="{{ T.world_search_rate }}" data-search-source="{{ T.world_search_source }}" data-coordinate-label="{{ T.map_coordinates }}" data-elevation-label="{{ T.altitude }}" data-elevation-missing="{{ T.map_elevation_missing }}">
+  <div class="page-width">
+    <div class="explorer-heading"><div><p class="eyebrow">{{ T.global_peak_index }}</p><h2>{{ T.world_search_title }}</h2><p>{{ T.world_search_sub }}</p></div><span class="open-data-mark"><i data-lucide="globe-2"></i> OPENSTREETMAP</span></div>
+    <form class="world-search-form" data-world-search>
+      <label for="world-mountain-query"><i data-lucide="search"></i><span class="visually-hidden">{{ T.world_search_placeholder }}</span><input id="world-mountain-query" type="search" minlength="3" maxlength="120" placeholder="{{ T.world_search_placeholder }}" autocomplete="off" required data-world-query></label>
+      <button class="button button-dark" type="submit">{{ T.world_search_submit }}<i data-lucide="arrow-up-right"></i></button>
+    </form>
+    <p class="explorer-status" data-search-status role="status">{{ T.world_search_sub }}</p>
+    <div class="world-search-results" data-search-results role="listbox" aria-label="{{ T.world_search_title }}"></div>
+    <section class="selected-peak" data-selected-peak hidden aria-live="polite">
+      <div class="selected-peak-header"><div><p class="eyebrow">{{ T.world_search_source }}</p><h3 data-selected-name></h3><p data-selected-location></p></div><span class="selected-peak-elevation"><i data-lucide="mountain"></i><span><small>{{ T.altitude }}</small><strong data-selected-elevation></strong></span></span></div>
+      <p class="selected-peak-coordinates"><i data-lucide="map-pin"></i>{{ T.map_coordinates }}: <span data-selected-coordinates></span></p>
+      <div class="explorer-grid">
+        <section class="explorer-map-panel"><div class="explorer-panel-heading"><h3>{{ T.map_title }}</h3><span><i data-lucide="route"></i> OPENSTREETMAP</span></div>{% include 'includes/map_widget.html' with latitude='' longitude='' mountain_name='' %}</section>
+        <div class="explorer-weather-panel">{% include 'includes/weather_widget.html' with latitude='' longitude='' location=T.weather_place %}</div>
+      </div>
+    </section>
+  </div>
+</section>

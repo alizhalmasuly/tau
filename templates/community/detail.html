@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}{{ story.title }} — tau.{% endblock %}
+{% block content %}
+<article class="story-detail">
+  <header class="story-detail-cover" style="--cover-image: url('{{ story.image }}')">
+    <div class="route-cover-shade"></div>
+    <div class="page-width story-cover-content">
+      <a class="back-link" href="{% url 'community:list' %}"><i data-lucide="arrow-left"></i>{{ T.nav_stories }}</a>
+      <p class="eyebrow light-eyebrow">{{ story.mountain.name|default:'ILE ALATAU' }} · {{ story.hike_date|date:'d.m.Y' }}</p>
+      <h1>{{ story.title }}</h1>
+      <a class="story-author-line" href="{% url 'accounts:public_profile' story.author.username %}"><span class="author-avatar">{{ story.author.username|first|upper }}</span><span>{{ T.author }} <strong>{{ story.author.username }}</strong></span><i data-lucide="arrow-up-right"></i></a>
+    </div>
+  </header>
+  <div class="page-width story-article-layout">
+    <div class="story-article-main">
+      <div class="article-meta">
+        <span><i data-lucide="activity"></i>{{ story.get_difficulty_display }}</span>
+        <span><i data-lucide="mountain"></i>{{ story.mountain.name|default:'—' }}</span>
+        <span><i data-lucide="calendar-days"></i>{{ story.hike_date|date:'d.m.Y' }}</span>
+        <form method="post" action="{% url 'community:like' story.pk %}">{% csrf_token %}<button class="article-like{% if liked %} is-liked{% endif %}" type="submit" aria-label="{{ T.like }}"><i data-lucide="heart"></i>{{ story.likes.count }}</button></form>
+      </div>
+      <div class="article-prose">{{ story.description|linebreaks }}</div>
+      {% if story.useful_tips %}<aside class="article-tip"><p class="eyebrow">{{ T.tip }}</p><p>{{ story.useful_tips|linebreaksbr }}</p></aside>{% endif %}
+    </div>
+    <aside class="story-aside">
+      <p class="eyebrow">{{ T.equipment_used }}</p><p>{{ story.equipment_used|default:'—' }}</p>
+      <a class="author-card" href="{% url 'accounts:public_profile' story.author.username %}"><span class="author-avatar">{{ story.author.username|first|upper }}</span><span><small>{{ T.author }}</small><strong>{{ story.author.username }}</strong></span><i data-lucide="arrow-up-right"></i></a>
+    </aside>
+    <section class="comments-section">
+      <div class="section-heading compact-heading"><div><p class="eyebrow">COMMUNITY</p><h2>{{ T.comments }} <span>{{ story.comments.count }}</span></h2></div></div>
+      {% for comment in story.comments.all %}
+        <article class="comment"><span class="author-avatar">{{ comment.author.username|first|upper }}</span><div><div class="comment-head"><strong>{{ comment.author.username }}</strong><time>{{ comment.created_at|date:'d.m.Y' }}</time></div><p>{{ comment.body|linebreaksbr }}</p></div></article>
+      {% empty %}<p class="muted-copy">{{ T.no_stories }}</p>{% endfor %}
+      <form method="post" class="comment-form">
+        {% csrf_token %}<label for="comment-body">{{ T.write_comment }}</label><textarea id="comment-body" name="body" rows="3" required placeholder="{{ T.write_comment }}…"></textarea>
+        {% if user.is_authenticated %}<button class="button button-dark" type="submit">{{ T.send_comment }}<i data-lucide="arrow-up-right"></i></button>{% else %}<a class="button button-dark" href="{% url 'accounts:login' %}">{{ T.nav_login }}<i data-lucide="arrow-up-right"></i></a>{% endif %}
+      </form>
+    </section>
+  </div>
+</article>
+{% endblock %}

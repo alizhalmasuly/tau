@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% load l10n %}
+{% block title %}{{ T.nav_weather }} — tau.{% endblock %}
+{% block content %}
+<section class="simple-page-head weather-page-head"><div class="page-width"><p class="eyebrow">43°13′ N · 76°57′ E</p><h1>{{ T.weather_title }}</h1><p>{{ T.weather_sub }}</p></div></section>
+<section class="weather-section"><div class="page-width weather-layout">
+  <div class="weather-main">
+    <div class="weather-route-select"><label for="weather-route">{{ T.choose_mountain }}</label><select id="weather-route" data-weather-select><option value="">{{ T.choose_mountain }}</option>{% for mountain in mountains %}<option value="{{ mountain.slug }}" data-latitude="{{ mountain.latitude|unlocalize }}" data-longitude="{{ mountain.longitude|unlocalize }}" data-location="{{ mountain.name }} · {{ mountain.location }}"{% if selected.pk == mountain.pk %} selected{% endif %}>{{ mountain.name }} · {{ mountain.location }}</option>{% endfor %}</select><i data-lucide="chevron-down"></i></div>
+    {% include 'includes/weather_widget.html' with latitude=selected.latitude longitude=selected.longitude location=selected.name %}
+  </div>
+  <aside class="weather-stats weather-safety-note"><p class="eyebrow">{{ T.safety }}</p><div class="weather-advice"><i data-lucide="info"></i><p>{{ T.weather_sub }} {{ T.assistant_hint }}</p></div></aside>
+</div></section>
+{% endblock %}

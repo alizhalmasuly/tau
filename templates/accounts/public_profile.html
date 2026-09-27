@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.username }} — tau.{% endblock %}
+{% block content %}
+<section class="profile-page">
+  <div class="page-width">
+    <p class="eyebrow">TAU COMMUNITY · HIKER PROFILE</p>
+    <div class="profile-header">
+      <div class="profile-identity">
+        {% if profile.avatar_url %}<img class="profile-avatar" src="{{ profile.avatar_url }}" alt="{{ profile_user.username }}">{% else %}<span class="profile-avatar profile-avatar-fallback">{{ profile_user.username|first|upper }}</span>{% endif %}
+        <div><h1>{{ profile_user.username }}</h1><p>{{ profile.home_region|default:'Almaty, Kazakhstan' }}{% if profile.bio %} · {{ profile.bio }}{% endif %}</p></div>
+      </div>
+      <span class="public-member-since">{{ stories|length }} {{ T.my_stories|lower }}</span>
+    </div>
+    <section class="public-stories"><div class="profile-block-heading"><h2>{{ T.my_stories }}</h2></div>
+      <div class="story-grid story-grid-wide">
+        {% for story in stories %}
+          <article class="story-card"><a class="story-card-image" href="{% url 'community:detail' story.pk %}" style="--story-image: url('{{ story.image }}')"><span class="image-tag">{{ story.mountain.name|default:'ILE ALATAU' }}</span><span class="story-open"><i data-lucide="arrow-up-right"></i></span></a><div class="story-card-content"><p class="story-meta">{{ story.hike_date|date:'d.m.Y' }} <span>·</span> {{ story.get_difficulty_display }}</p><h3><a href="{% url 'community:detail' story.pk %}">{{ story.title }}</a></h3><p>{{ story.description|truncatechars:140 }}</p><a class="text-link" href="{% url 'community:detail' story.pk %}">{{ T.read_story }}<i data-lucide="arrow-right"></i></a></div></article>
+  {% empty %}<p class="muted-copy">{{ T.no_stories }}</p>{% endfor %}
++      </div>
++    </section>
++  </div>
++</section>
++{% endblock %}

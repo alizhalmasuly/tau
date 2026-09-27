@@ -1,0 +1,20 @@
+{% load l10n %}
+<section class="live-weather-card" data-weather-widget data-weather-endpoint="{% url 'weather:api' %}" data-latitude="{{ latitude|default:''|unlocalize }}" data-longitude="{{ longitude|default:''|unlocalize }}" data-language="{{ CURRENT_LANGUAGE }}" data-loading-label="{{ T.weather_loading }}" data-missing-key="{{ T.weather_api_key_missing }}" data-api-error="{{ T.weather_api_error }}" data-coordinate-error="{{ T.weather_coordinates_error }}" data-forecast-error="{{ T.weather_forecast_error }}" data-location="{{ location|default:T.weather_place }}" aria-live="polite">
+  <div class="live-weather-heading"><div><p class="eyebrow">{{ T.weather_title }}</p><h2 data-weather-location>{{ location|default:T.weather_place }}</h2></div><span class="weather-live-mark"><i data-lucide="cloud-sun"></i></span></div>
+  <p class="live-weather-message" data-weather-message>{{ T.weather_loading }}</p>
+  <div class="live-weather-content" data-weather-content hidden>
+    <div class="live-weather-current"><div><span data-weather-condition></span><strong><span data-weather-temperature>--</span>°</strong></div><p>{{ T.feels_like }} <strong><span data-weather-feels>--</span>°</strong></p></div>
+    <div class="live-weather-metrics">
+      <div class="weather-stat" data-weather-row="wind"><i data-lucide="wind"></i><span>{{ T.wind }}</span><strong data-weather-value="wind">--</strong></div>
+      <div class="weather-stat" data-weather-row="humidity"><i data-lucide="droplets"></i><span>{{ T.humidity }}</span><strong data-weather-value="humidity">--</strong></div>
+      <div class="weather-stat" data-weather-row="precipitation"><i data-lucide="cloud-rain"></i><span>{{ T.precipitation }}</span><strong data-weather-value="precipitation">--</strong></div>
+      <div class="weather-stat" data-weather-row="visibility"><i data-lucide="eye"></i><span>{{ T.visibility }}</span><strong data-weather-value="visibility">--</strong></div>
+      <div class="weather-stat" data-weather-row="sunrise"><i data-lucide="sunrise"></i><span>{{ T.sunrise }}</span><strong data-weather-value="sunrise">--</strong></div>
+      <div class="weather-stat" data-weather-row="sunset"><i data-lucide="sunset"></i><span>{{ T.sunset }}</span><strong data-weather-value="sunset">--</strong></div>
+    </div>
+    <p class="live-weather-message forecast-message" data-forecast-message hidden></p>
+    <div class="live-forecast" data-hourly-section hidden><h3>{{ T.weather_hourly }}</h3><div class="live-hourly-list" data-hourly-list></div></div>
+    <div class="live-forecast" data-daily-section hidden><h3>{{ T.weather_daily }}</h3><div class="live-daily-list" data-daily-list></div></div>
+    <p class="weather-attribution">OpenWeather · {{ T.map_coordinates }}: <span data-weather-coordinate>{{ latitude }}, {{ longitude }}</span></p>
+  </div>
+</section>
